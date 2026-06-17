@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Trello Clone</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #0079BF;
+      color: #333;
+    }
+    
+    .app-header {
+      background-color: rgba(0,0,0,0.15);
+      height: 40px;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .board-header {
+      padding: 16px;
+      color: white;
+    }
+    
+    .lists-container {
+      display: flex;
+      overflow-x: auto;
+      padding: 0 16px;
+      height: calc(100vh - 120px);
+    }
+    
+    .list {
+      background-color: #ebecf0;
+      border-radius: 3px;
+      width: 272px;
+      margin-right: 16px;
+      padding: 8px;
+      height: fit-content;
+    }
+    
+    .card {
+      background-color: white;
+      border-radius: 3px;
+      padding: 8px;
+      margin-bottom: 8px;
+      box-shadow: 0 1px 0 rgba(9,30,66,.25);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-header">
+    <div>Board Icon | Search</div>
+    <div>Trello Logo</div>
+    <div>+ | Bell | Avatar</div>
+  </div>
+  
+  <div class="board-header">
+    <h2>Classic Project Alpha</h2>
+  </div>
+  
+  <div class="lists-container">
+    <div class="list">
+      <h3>To Do</h3>
+      <div class="card">Finalize Q3 roadmap</div>
+      <div class="card">Refactor auth logic</div>
+      <div>Add another card...</div>
+    </div>
+    
+    <div class="list">
+      <h3>In Progress</h3>
+      <div class="card">Draft press release</div>
+      <div>Add another card...</div>
+    </div>
+    
+    <div class="list">
+      <h3>Done</h3>
+      <div class="card">Set up database schema</div>
+      <div>Add another card...</div>
+    </div>
+  </div>
+</body>
+</html>
