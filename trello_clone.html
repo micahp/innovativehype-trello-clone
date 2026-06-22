@@ -209,9 +209,15 @@ body {
   flex-wrap: wrap;
 }
 .card-label {
-  height: 8px;
-  min-width: 40px;
-  border-radius: 4px;
+  height: auto;
+  min-width: 32px;
+  border-radius: 3px;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+  display: inline-block;
 }
 
 /* ── Drag states ── */
@@ -654,7 +660,7 @@ function render() {
           <div class="card" draggable="true" data-card-id="${card.id}" data-list-id="${list.id}" aria-label="Drag card: ${escHtml(card.title)}">
             ${card.labels.length > 0 ? `
               <div class="card-labels">
-                ${card.labels.map(l => `<span class="card-label" style="background:${l.color}" title="${escHtml(l.text)}"></span>`).join('')}
+                ${card.labels.map(l => `<span class="card-label" style="background:${l.color}">${escHtml(l.text)}</span>`).join('')}
               </div>` : ''}
             <div class="card-title">${escHtml(card.title)}</div>
             ${(card.comments.length > 0 || (card.checklist && card.checklist.length > 0)) ? `
@@ -702,15 +708,19 @@ function escHtml(str) {
 }
 
 // ── Event Binding ──
+let boardTitleListener = null;
 function attachEvents() {
-  // Board title
-  document.getElementById('boardTitle').addEventListener('change', function() {
+  // Board title — remove old listener before adding new one
+  const boardTitleEl = document.getElementById('boardTitle');
+  if (boardTitleListener) boardTitleEl.removeEventListener('change', boardTitleListener);
+  boardTitleListener = function() {
     const val = this.value.trim();
     if (!val) { this.value = boardState.title; return; }
     boardState.title = val;
     saveToLocalStorage();
     scheduleSync();
-  });
+  };
+  boardTitleEl.addEventListener('change', boardTitleListener);
   
   // List title
   document.querySelectorAll('.list-title-input').forEach(input => {
@@ -751,22 +761,34 @@ function attachEvents() {
   
   // Add card confirm
   document.querySelectorAll('.add-card-confirm').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const listEl = this.closest('.cards-container');
-      const listId = listEl.dataset.listId;
-      const textarea = listEl.querySelector('.card-edit-input');
-      const title = textarea.value.trim();
-      if (!title) return;
-      
-      const list = boardState.lists.find(l => l.id === listId);
-      if (list) {
-        list.cards.push({ id: genId(), title, description: '', labels: [], comments: [], checklist: [] });
-        saveToLocalStorage();
-        scheduleSync();
+    btn.addEventListener('click', addCardFromForm);
+  });
+  
+  // Enter key on card creation textarea
+  document.querySelectorAll('.card-edit-input').forEach(textarea => {
+    textarea.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        addCardFromForm.call(this.closest('.cards-container'));
       }
-      render();
     });
   });
+  
+  function addCardFromForm() {
+    const listEl = this.closest('.cards-container');
+    const listId = listEl.dataset.listId;
+    const textarea = listEl.querySelector('.card-edit-input');
+    const title = textarea.value.trim();
+    if (!title) return;
+    
+    const list = boardState.lists.find(l => l.id === listId);
+    if (list) {
+      list.cards.push({ id: genId(), title, description: '', labels: [], comments: [], checklist: [] });
+      saveToLocalStorage();
+      scheduleSync();
+    }
+    render();
+  }
   
   // Add card cancel
   document.querySelectorAll('.add-card-cancel').forEach(btn => {
@@ -1012,11 +1034,10 @@ function openModal(listId, cardId) {
   document.body.appendChild(modal);
   
   // Close handlers
-  modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
-  document.getElementById('modalClose').addEventListener('click', closeModal);
-  document.addEventListener('keydown', function escHandler(e) {
-    if (e.key === 'Escape') { closeModal(); document.removeEventListener('keydown', escHandler); }
-  });
+  function onEsc(e) { if (e.key === 'Escape') { closeModal(); } }
+  document.addEventListener('keydown', onEsc);
+  modal.addEventListener('click', function(e) { if (e.target === modal) { document.removeEventListener('keydown', onEsc); closeModal(); } });
+  document.getElementById('modalClose').addEventListener('click', function() { document.removeEventListener('keydown', onEsc); closeModal(); });
   
   // Title change
   document.getElementById('modalTitle').addEventListener('change', function() {
@@ -1064,7 +1085,7 @@ function openModal(listId, cardId) {
   });
   
   // Comments
-  document.getElementById('addCommentBtn').addEventListener('click', function() {
+  function addComment() {
     const input = document.getElementById('commentInput');
     const text = input.value.trim();
     if (!text) return;
@@ -1073,6 +1094,10 @@ function openModal(listId, cardId) {
     input.value = '';
     saveToLocalStorage(); scheduleSync(); render();
     openModal(listId, cardId);
+  }
+  document.getElementById('addCommentBtn').addEventListener('click', addComment);
+  document.getElementById('commentInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addComment(); }
   });
   
   // Checklist
@@ -1093,7 +1118,7 @@ function openModal(listId, cardId) {
     document.getElementById('checklistInput').focus();
   });
   
-  document.getElementById('saveChecklistBtn').addEventListener('click', function() {
+  function addChecklistItem() {
     const input = document.getElementById('checklistInput');
     const text = input.value.trim();
     if (!text) return;
@@ -1103,6 +1128,10 @@ function openModal(listId, cardId) {
     document.getElementById('checklistAddWrap').classList.add('hidden');
     saveToLocalStorage(); scheduleSync(); render();
     openModal(listId, cardId);
+  }
+  document.getElementById('saveChecklistBtn').addEventListener('click', addChecklistItem);
+  document.getElementById('checklistInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); addChecklistItem(); }
   });
 }
 
@@ -1122,6 +1151,23 @@ document.getElementById('searchInput').addEventListener('input', function() {
       card.style.display = '';
     } else {
       card.style.display = 'none';
+    }
+  });
+  // Show/hide empty state messages per list when filtering
+  document.querySelectorAll('.cards-container').forEach(container => {
+    const visibleCards = container.querySelectorAll('.card[style*="display: none"]').length;
+    const total = container.querySelectorAll('.card').length;
+    let emptyEl = container.querySelector('.search-empty');
+    if (query && visibleCards === total && total > 0) {
+      if (!emptyEl) {
+        emptyEl = document.createElement('div');
+        emptyEl.className = 'search-empty';
+        emptyEl.style.cssText = 'color:#5e6c84;font-size:13px;text-align:center;padding:16px 8px;font-style:italic;';
+        emptyEl.textContent = 'No matching cards';
+        container.insertBefore(emptyEl, container.querySelector('.add-card-btn'));
+      }
+    } else if (emptyEl) {
+      emptyEl.remove();
     }
   });
 });
