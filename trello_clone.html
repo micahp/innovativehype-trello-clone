@@ -1,85 +1,1137 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Trello Clone</title>
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #0079BF;
-      color: #333;
-    }
-    
-    .app-header {
-      background-color: rgba(0,0,0,0.15);
-      height: 40px;
-      padding: 8px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    
-    .board-header {
-      padding: 16px;
-      color: white;
-    }
-    
-    .lists-container {
-      display: flex;
-      overflow-x: auto;
-      padding: 0 16px;
-      height: calc(100vh - 120px);
-    }
-    
-    .list {
-      background-color: #ebecf0;
-      border-radius: 3px;
-      width: 272px;
-      margin-right: 16px;
-      padding: 8px;
-      height: fit-content;
-    }
-    
-    .card {
-      background-color: white;
-      border-radius: 3px;
-      padding: 8px;
-      margin-bottom: 8px;
-      box-shadow: 0 1px 0 rgba(9,30,66,.25);
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trello Clone</title>
+<style>
+/* ── Reset & Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+  background: #0079BF;
+  color: #172b4d;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── App Header ── */
+.app-header {
+  background: rgba(0,0,0,0.15);
+  height: 40px;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  backdrop-filter: blur(4px);
+}
+.app-header-left, .app-header-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.header-btn {
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  padding: 6px 10px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+.header-btn:hover { background: rgba(255,255,255,0.3); }
+.header-btn .icon { font-size: 16px; }
+.header-logo {
+  color: rgba(255,255,255,0.5);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  font-family: 'Georgia', serif;
+  opacity: 0.7;
+  user-select: none;
+}
+.search-input {
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 3px;
+  color: #fff;
+  padding: 5px 10px;
+  font-size: 13px;
+  width: 180px;
+  outline: none;
+}
+.search-input::placeholder { color: rgba(255,255,255,0.6); }
+.search-input:focus { background: rgba(255,255,255,0.35); }
+
+/* ── Board Header ── */
+.board-header {
+  padding: 8px 16px 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.board-title-input {
+  background: transparent;
+  border: 2px solid transparent;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 3px;
+  outline: none;
+  min-width: 200px;
+}
+.board-title-input:hover { background: rgba(255,255,255,0.15); }
+.board-title-input:focus {
+  background: rgba(255,255,255,0.25);
+  border-color: rgba(255,255,255,0.5);
+}
+
+/* ── Lists Container ── */
+.lists-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 16px;
+  overflow-x: auto;
+  min-height: calc(100vh - 104px);
+  padding-bottom: 16px;
+}
+
+/* ── List ── */
+.list {
+  background: #ebecf0;
+  border-radius: 3px;
+  width: 272px;
+  min-width: 272px;
+  max-height: calc(100vh - 140px);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+.list-header {
+  padding: 8px 8px 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.list-title-input {
+  background: transparent;
+  border: 2px solid transparent;
+  color: #172b4d;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 4px 6px;
+  border-radius: 3px;
+  outline: none;
+  width: 100%;
+}
+.list-title-input:hover { background: rgba(0,0,0,0.05); }
+.list-title-input:focus {
+  background: #fff;
+  border-color: #0079BF;
+}
+.list-delete-btn {
+  background: none;
+  border: none;
+  color: #6b778c;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  line-height: 1;
+  visibility: hidden;
+}
+.list-header:hover .list-delete-btn { visibility: visible; }
+.list-delete-btn:hover { background: rgba(0,0,0,0.1); color: #172b4d; }
+
+/* ── Cards container (scrollable per list) ── */
+.cards-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 8px 4px;
+  min-height: 10px;
+}
+
+/* ── Card ── */
+.card {
+  background: #fff;
+  border-radius: 3px;
+  padding: 6px 8px;
+  margin-bottom: 6px;
+  box-shadow: 0 1px 0 rgba(9,30,66,.25);
+  cursor: grab;
+  transition: box-shadow 85ms ease, transform 85ms ease;
+  position: relative;
+}
+.card:hover {
+  box-shadow: 0 4px 8px rgba(9,30,66,.15);
+  background: #fafbfc;
+}
+.card:active { cursor: grabbing; }
+.card.dragging {
+  opacity: 0.4;
+  transform: rotate(2deg);
+  box-shadow: 0 8px 16px rgba(9,30,66,.2);
+}
+.card-title {
+  font-size: 14px;
+  color: #172b4d;
+  word-wrap: break-word;
+  line-height: 1.35;
+}
+.card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+.card-badge {
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  color: #5e6c84;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.badge-comments { background: #dfe1e6; }
+.badge-checklist { background: #dfe1e6; }
+.card-labels {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+.card-label {
+  height: 8px;
+  min-width: 40px;
+  border-radius: 4px;
+}
+
+/* ── Drag states ── */
+.cards-container.drag-over {
+  background: rgba(0,0,0,0.06);
+  border-radius: 3px;
+}
+.card-placeholder {
+  height: 38px;
+  background: rgba(0,0,0,0.08);
+  border-radius: 3px;
+  margin-bottom: 6px;
+  border: 2px dashed #0079BF;
+}
+
+/* ── Add card / Add list ── */
+.add-card-btn, .add-list-btn {
+  background: none;
+  border: none;
+  color: #5e6c84;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 8px;
+  border-radius: 3px;
+  width: 100%;
+  text-align: left;
+  margin: 0 4px 4px;
+}
+.add-card-btn:hover { background: rgba(9,30,66,.08); color: #172b4d; }
+.add-list-btn {
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+  padding: 10px 12px;
+  border-radius: 3px;
+  width: 272px;
+  min-width: 272px;
+  text-align: left;
+  font-size: 14px;
+}
+.add-list-btn:hover { background: rgba(255,255,255,0.3); }
+
+.card-edit-input, .list-add-input {
+  background: #fff;
+  border: 2px solid #0079BF;
+  border-radius: 3px;
+  padding: 8px;
+  font-size: 14px;
+  width: 100%;
+  outline: none;
+  font-family: inherit;
+  resize: none;
+}
+.card-edit-actions, .list-add-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+.btn-primary {
+  background: #0079BF;
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.btn-primary:hover { background: #026aa7; }
+.btn-cancel {
+  background: none;
+  border: none;
+  color: #5e6c84;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 4px 8px;
+}
+.btn-cancel:hover { color: #172b4d; }
+
+/* ── Modal ── */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 48px;
+}
+.modal {
+  background: #f4f5f7;
+  border-radius: 3px;
+  width: 768px;
+  max-width: 95vw;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+.modal-header {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.modal-title-input {
+  flex: 1;
+  background: transparent;
+  border: 2px solid transparent;
+  font-size: 20px;
+  font-weight: 600;
+  color: #172b4d;
+  padding: 4px 8px;
+  border-radius: 3px;
+  outline: none;
+  font-family: inherit;
+}
+.modal-title-input:hover { background: rgba(0,0,0,0.04); }
+.modal-title-input:focus {
+  background: #fff;
+  border-color: #0079BF;
+}
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #6b778c;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 3px;
+  line-height: 1;
+}
+.modal-close:hover { background: rgba(0,0,0,0.08); color: #172b4d; }
+.modal-body {
+  padding: 0 16px 24px;
+  display: flex;
+  gap: 16px;
+}
+.modal-main { flex: 1; }
+.modal-section {
+  margin-bottom: 20px;
+}
+.modal-section h4 {
+  font-size: 12px;
+  font-weight: 600;
+  color: #5e6c84;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+.modal-section textarea {
+  width: 100%;
+  min-height: 80px;
+  background: rgba(0,0,0,0.03);
+  border: none;
+  border-radius: 3px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: #172b4d;
+  outline: none;
+  font-family: inherit;
+  resize: vertical;
+}
+.modal-section textarea:focus { background: #fff; box-shadow: inset 0 0 0 2px #0079BF; }
+.modal-sidebar {
+  width: 170px;
+  min-width: 170px;
+}
+.modal-sidebar h4 {
+  font-size: 12px;
+  font-weight: 600;
+  color: #5e6c84;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+/* ── Labels in modal ── */
+.label-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.label-swatch {
+  width: 100%;
+  height: 32px;
+  border-radius: 3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+}
+.label-swatch:hover { opacity: 0.85; }
+.label-swatch.selected { outline: 3px solid #0079BF; outline-offset: 2px; }
+.label-text-input {
+  width: 100%;
+  background: rgba(0,0,0,0.03);
+  border: none;
+  border-radius: 3px;
+  padding: 6px 8px;
+  margin-top: 6px;
+  font-size: 13px;
+  outline: none;
+  font-family: inherit;
+}
+.label-text-input:focus { background: #fff; box-shadow: inset 0 0 0 2px #0079BF; }
+
+/* ── Comments ── */
+.comment-item {
+  background: #fff;
+  border-radius: 3px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  font-size: 14px;
+}
+.comment-input-wrap {
+  display: flex;
+  gap: 6px;
+}
+.comment-input-wrap textarea {
+  flex: 1;
+  min-height: 36px;
+  max-height: 120px;
+  background: #fff;
+  border: none;
+  border-radius: 3px;
+  padding: 8px 12px;
+  font-size: 14px;
+  outline: none;
+  font-family: inherit;
+  resize: vertical;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+.comment-input-wrap textarea:focus { box-shadow: inset 0 0 0 2px #0079BF; }
+
+/* ── Checklist ── */
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 13px;
+}
+.checklist-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+.checklist-item .completed { text-decoration: line-through; color: #5e6c84; }
+.add-checklist-item {
+  background: none;
+  border: none;
+  color: #5e6c84;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 6px 0;
+  border-radius: 3px;
+  width: 100%;
+  text-align: left;
+}
+.add-checklist-item:hover { background: rgba(0,0,0,0.04); color: #172b4d; }
+
+/* ── Sync indicator ── */
+.sync-indicator {
+  position: fixed;
+  bottom: 12px;
+  right: 16px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.6);
+  background: rgba(0,0,0,0.3);
+  padding: 4px 10px;
+  border-radius: 3px;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.sync-indicator.saved { color: rgba(255,255,255,0.8); }
+.sync-indicator.error { color: #ff8b8b; }
+
+/* ── Empty list state ── */
+.empty-list {
+  color: #5e6c84;
+  font-size: 13px;
+  text-align: center;
+  padding: 16px 8px;
+  font-style: italic;
+}
+
+/* ── Scrollbar styling ── */
+.lists-container::-webkit-scrollbar { height: 8px; }
+.lists-container::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 4px; }
+.lists-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
+.cards-container::-webkit-scrollbar { width: 6px; }
+.cards-container::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 3px; }
+
+/* ── Utility ── */
+.hidden { display: none !important; }
+</style>
 </head>
 <body>
-  <div class="app-header">
-    <div>Board Icon | Search</div>
-    <div>Trello Logo</div>
-    <div>+ | Bell | Avatar</div>
+
+<!-- App Header -->
+<div class="app-header">
+  <div class="app-header-left">
+    <button class="header-btn" title="Boards"><span class="icon">▦</span> Boards</button>
+    <input class="search-input" type="text" placeholder="Search cards..." id="searchInput">
   </div>
+  <div class="header-logo">Trello</div>
+  <div class="app-header-right">
+    <button class="header-btn" title="Create"><span class="icon">＋</span></button>
+    <button class="header-btn" title="Notifications"><span class="icon">🔔</span></button>
+    <button class="header-btn" title="Account"><span class="icon">●</span></button>
+  </div>
+</div>
+
+<!-- Board Header -->
+<div class="board-header">
+  <input class="board-title-input" id="boardTitle" value="Classic Project Alpha" spellcheck="false">
+</div>
+
+<!-- Lists Container -->
+<div class="lists-container" id="listsContainer"></div>
+
+<!-- Sync Indicator -->
+<div class="sync-indicator saved hidden" id="syncIndicator">✓ Saved</div>
+
+<script>
+// ── State ──
+const DEFAULT_BOARD = {
+  title: "Classic Project Alpha",
+  lists: [
+    { id: "l1", title: "To Do", cards: [
+      { id: "c1a", title: "Finalize Q3 roadmap", description: "", labels: [], comments: [], checklist: [] },
+      { id: "c1b", title: "Refactor auth logic", description: "", labels: [{ color: "#61bd4f", text: "backend" }], comments: [], checklist: [] },
+      { id: "c1c", title: "Research competitor pricing", description: "", labels: [], comments: [], checklist: [] }
+    ]},
+    { id: "l2", title: "In Progress", cards: [
+      { id: "c2a", title: "Draft press release", description: "", labels: [{ color: "#ff9f1a", text: "urgent" }], comments: [{ text: "First draft due Friday" }], checklist: [] },
+      { id: "c2b", title: "Update API documentation", description: "", labels: [{ color: "#0079bf", text: "docs" }], comments: [], checklist: [
+        { text: "Authentication section", done: true },
+        { text: "Rate limiting section", done: false },
+        { text: "Examples", done: false }
+      ]}
+    ]},
+    { id: "l3", title: "Code Review", cards: [
+      { id: "c3a", title: "PR #142: Payment integration", description: "", labels: [{ color: "#eb5a46", text: "blocker" }], comments: [{ text: "Needs security review" }], checklist: [] }
+    ]},
+    { id: "l4", title: "Testing", cards: [
+      { id: "c4a", title: "E2E tests for checkout flow", description: "", labels: [], comments: [], checklist: [] },
+      { id: "c4b", title: "Load test the search endpoint", description: "", labels: [{ color: "#c377e0", text: "perf" }], comments: [], checklist: [] }
+    ]},
+    { id: "l5", title: "Done", cards: [
+      { id: "c5a", title: "Set up database schema", description: "Created tables for users, projects, tasks", labels: [{ color: "#61bd4f", text: "done" }], comments: [{ text: "Deployed to staging ✓"}], checklist: [] },
+      { id: "c5b", title: "Configure CI/CD pipeline", description: "", labels: [], comments: [], checklist: [] }
+    ]}
+  ]
+};
+
+let boardState = JSON.parse(JSON.stringify(DEFAULT_BOARD));
+let draggedCard = null;
+let draggedFromListId = null;
+let draggedCardIndex = null;
+let editingCardId = null;
+const BACKEND_URL = localStorage.getItem('backend_url') || 'http://localhost:3000';
+
+// ── ID generation ──
+function genId() { return 'id' + Date.now() + Math.random().toString(36).slice(2, 8); }
+
+// ── Persistence ──
+function saveToLocalStorage() {
+  try { localStorage.setItem('trello_board', JSON.stringify(boardState)); }
+  catch(e) { console.warn('localStorage save failed:', e.message); }
+  showSyncStatus('saved');
+}
+
+function loadFromLocalStorage() {
+  try {
+    const raw = localStorage.getItem('trello_board');
+    if (raw) { boardState = JSON.parse(raw); return true; }
+  } catch(e) { console.warn('localStorage load failed, using default:', e.message); }
+  return false;
+}
+
+// ── Backend Sync ──
+let syncTimer = null;
+function scheduleSync() {
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(syncToBackend, 2000);
+}
+async function syncToBackend() {
+  try {
+    showSyncStatus('syncing');
+    const res = await fetch(`${BACKEND_URL}/api/board`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(boardState)
+    });
+    if (res.ok) showSyncStatus('saved');
+    else showSyncStatus('error');
+  } catch(e) {
+    showSyncStatus('error');
+  }
+  setTimeout(() => {
+    const el = document.getElementById('syncIndicator');
+    el.classList.add('hidden');
+  }, 2000);
+}
+function showSyncStatus(status) {
+  const el = document.getElementById('syncIndicator');
+  el.classList.remove('hidden', 'saved', 'error');
+  el.classList.add(status);
+  el.textContent = { saved: '✓ Saved', syncing: '⟳ Syncing...', error: '⚠ Offline' }[status] || '';
+  clearTimeout(el._hideTimer);
+  if (status === 'saved') {
+    el._hideTimer = setTimeout(() => el.classList.add('hidden'), 2500);
+  }
+}
+
+// ── Render ──
+function render() {
+  const container = document.getElementById('listsContainer');
+  document.getElementById('boardTitle').value = boardState.title;
   
-  <div class="board-header">
-    <h2>Classic Project Alpha</h2>
-  </div>
+  container.innerHTML = '';
   
-  <div class="lists-container">
-    <div class="list">
-      <h3>To Do</h3>
-      <div class="card">Finalize Q3 roadmap</div>
-      <div class="card">Refactor auth logic</div>
-      <div>Add another card...</div>
+  boardState.lists.forEach((list, listIdx) => {
+    const listEl = document.createElement('div');
+    listEl.className = 'list';
+    listEl.innerHTML = `
+      <div class="list-header">
+        <input class="list-title-input" value="${escHtml(list.title)}" data-list-id="${list.id}" spellcheck="false">
+        <button class="list-delete-btn" title="Delete list" data-delete-list="${list.id}">✕</button>
+      </div>
+      <div class="cards-container" data-list-id="${list.id}">
+        ${list.cards.length === 0 ? '<div class="empty-list">This list is empty</div>' : ''}
+        ${list.cards.map((card, cardIdx) => `
+          <div class="card" draggable="true" data-card-id="${card.id}" data-list-id="${list.id}" aria-label="Drag card: ${escHtml(card.title)}">
+            ${card.labels.length > 0 ? `
+              <div class="card-labels">
+                ${card.labels.map(l => `<span class="card-label" style="background:${l.color}" title="${escHtml(l.text)}"></span>`).join('')}
+              </div>` : ''}
+            <div class="card-title">${escHtml(card.title)}</div>
+            ${(card.comments.length > 0 || (card.checklist && card.checklist.length > 0)) ? `
+              <div class="card-badges">
+                ${card.comments.length > 0 ? `<span class="card-badge badge-comments">💬 ${card.comments.length}</span>` : ''}
+                ${card.checklist && card.checklist.length > 0 ? 
+                  `<span class="card-badge badge-checklist">☑ ${card.checklist.filter(i => i.done).length}/${card.checklist.length}</span>` : ''}
+              </div>` : ''}
+          </div>
+        `).join('')}
+        <div class="card-edit-area hidden">
+          <textarea class="card-edit-input" rows="2" placeholder="Enter a title for this card..."></textarea>
+          <div class="card-edit-actions">
+            <button class="btn-primary add-card-confirm">Add Card</button>
+            <button class="btn-cancel add-card-cancel">✕</button>
+          </div>
+        </div>
+        <button class="add-card-btn">+ Add a card</button>
+      </div>
+    `;
+    container.appendChild(listEl);
+  });
+  
+  // Add list button
+  const addListWrap = document.createElement('div');
+  addListWrap.innerHTML = `
+    <div class="list-add-area hidden" style="width:272px;min-width:272px;background:#ebecf0;border-radius:3px;padding:8px;">
+      <input class="list-add-input" placeholder="Enter list title...">
+      <div class="list-add-actions">
+        <button class="btn-primary add-list-confirm">Add List</button>
+        <button class="btn-cancel add-list-cancel">✕</button>
+      </div>
     </div>
+    <button class="add-list-btn">+ Add another list</button>
+  `;
+  container.appendChild(addListWrap);
+  
+  attachEvents();
+}
+
+function escHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// ── Event Binding ──
+function attachEvents() {
+  // Board title
+  document.getElementById('boardTitle').addEventListener('change', function() {
+    const val = this.value.trim();
+    if (!val) { this.value = boardState.title; return; }
+    boardState.title = val;
+    saveToLocalStorage();
+    scheduleSync();
+  });
+  
+  // List title
+  document.querySelectorAll('.list-title-input').forEach(input => {
+    input.addEventListener('change', function() {
+      const listId = this.dataset.listId;
+      const val = this.value.trim();
+      if (!val) { render(); return; }
+      const list = boardState.lists.find(l => l.id === listId);
+      if (list) { list.title = val; saveToLocalStorage(); scheduleSync(); }
+    });
+  });
+  
+  // Delete list
+  document.querySelectorAll('[data-delete-list]').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const listId = this.dataset.deleteList;
+      if (confirm('Delete this list and all its cards?')) {
+        boardState.lists = boardState.lists.filter(l => l.id !== listId);
+        saveToLocalStorage();
+        scheduleSync();
+        render();
+      }
+    });
+  });
+  
+  // Add card buttons
+  document.querySelectorAll('.add-card-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const listEl = this.closest('.cards-container');
+      const editArea = listEl.querySelector('.card-edit-area');
+      const addBtn = listEl.querySelector('.add-card-btn');
+      const textarea = editArea.querySelector('.card-edit-input');
+      editArea.classList.remove('hidden');
+      addBtn.classList.add('hidden');
+      textarea.focus();
+    });
+  });
+  
+  // Add card confirm
+  document.querySelectorAll('.add-card-confirm').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const listEl = this.closest('.cards-container');
+      const listId = listEl.dataset.listId;
+      const textarea = listEl.querySelector('.card-edit-input');
+      const title = textarea.value.trim();
+      if (!title) return;
+      
+      const list = boardState.lists.find(l => l.id === listId);
+      if (list) {
+        list.cards.push({ id: genId(), title, description: '', labels: [], comments: [], checklist: [] });
+        saveToLocalStorage();
+        scheduleSync();
+      }
+      render();
+    });
+  });
+  
+  // Add card cancel
+  document.querySelectorAll('.add-card-cancel').forEach(btn => {
+    btn.addEventListener('click', () => render());
+  });
+  
+  // Add list button
+  const addListBtn = document.querySelector('.add-list-btn');
+  if (addListBtn) {
+    addListBtn.addEventListener('click', function() {
+      const area = document.querySelector('.list-add-area');
+      const btn = document.querySelector('.add-list-btn');
+      const input = document.querySelector('.list-add-input');
+      area.classList.remove('hidden');
+      btn.classList.add('hidden');
+      input.focus();
+    });
+  }
+  
+  // Add list confirm
+  const addListConfirm = document.querySelector('.add-list-confirm');
+  if (addListConfirm) {
+    addListConfirm.addEventListener('click', function() {
+      const input = document.querySelector('.list-add-input');
+      const title = input.value.trim();
+      if (!title) return;
+      boardState.lists.push({ id: genId(), title, cards: [] });
+      saveToLocalStorage();
+      scheduleSync();
+      render();
+    });
+  }
+  
+  // Add list cancel
+  const addListCancel = document.querySelector('.add-list-cancel');
+  if (addListCancel) {
+    addListCancel.addEventListener('click', () => render());
+  }
+  
+  // Card click → open modal
+  document.querySelectorAll('.card').forEach(cardEl => {
+    cardEl.addEventListener('click', function(e) {
+      if (draggedCard) return; // Don't open modal during drag
+      const cardId = this.dataset.cardId;
+      const listId = this.dataset.listId;
+      openModal(listId, cardId);
+    });
     
-    <div class="list">
-      <h3>In Progress</h3>
-      <div class="card">Draft press release</div>
-      <div>Add another card...</div>
+    // Drag events
+    cardEl.addEventListener('dragstart', handleDragStart);
+    cardEl.addEventListener('dragend', handleDragEnd);
+  });
+  
+  // Drop zones
+  document.querySelectorAll('.cards-container').forEach(container => {
+    container.addEventListener('dragover', handleDragOver);
+    container.addEventListener('dragleave', handleDragLeave);
+    container.addEventListener('drop', handleDrop);
+  });
+}
+
+// ── Drag and Drop ──
+function handleDragStart(e) {
+  draggedCard = this;
+  draggedFromListId = this.dataset.listId;
+  const cardsContainer = this.parentElement;
+  draggedCardIndex = Array.from(cardsContainer.children).filter(c => c.classList.contains('card')).indexOf(this);
+  this.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', this.dataset.cardId);
+  setTimeout(() => { if (draggedCard) this.style.opacity = '0.4'; }, 0);
+}
+
+function handleDragEnd(e) {
+  this.classList.remove('dragging');
+  this.style.opacity = '';
+  document.querySelectorAll('.cards-container').forEach(c => c.classList.remove('drag-over'));
+  document.querySelectorAll('.card-placeholder').forEach(p => p.remove());
+  draggedCard = null;
+  draggedFromListId = null;
+  draggedCardIndex = null;
+}
+
+function handleDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  this.classList.add('drag-over');
+  
+  // Insert visual placeholder
+  const afterElement = getDragAfterElement(this, e.clientY);
+  const placeholder = document.querySelector('.card-placeholder');
+  if (placeholder) placeholder.remove();
+  
+  const ph = document.createElement('div');
+  ph.className = 'card-placeholder';
+  if (afterElement) {
+    this.insertBefore(ph, afterElement);
+  } else {
+    const addBtn = this.querySelector('.add-card-btn');
+    if (addBtn) this.insertBefore(ph, addBtn);
+    else this.appendChild(ph);
+  }
+}
+
+function handleDragLeave(e) {
+  this.classList.remove('drag-over');
+  const placeholder = this.querySelector('.card-placeholder');
+  if (placeholder && !this.contains(e.relatedTarget)) {
+    placeholder.remove();
+  }
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  this.classList.remove('drag-over');
+  document.querySelectorAll('.card-placeholder').forEach(p => p.remove());
+  
+  const cardId = e.dataTransfer.getData('text/plain');
+  const toListId = this.dataset.listId;
+  const fromList = boardState.lists.find(l => l.id === draggedFromListId);
+  const toList = boardState.lists.find(l => l.id === toListId);
+  
+  if (!fromList || !toList) return;
+  if (!draggedCard) return;
+  
+  // Remove card from source
+  const [card] = fromList.cards.splice(draggedCardIndex, 1);
+  
+  // Find insert position in target
+  const afterElement = getDragAfterElement(this, e.clientY);
+  let insertIdx = toList.cards.length;
+  if (afterElement) {
+    const afterId = afterElement.dataset.cardId;
+    insertIdx = toList.cards.findIndex(c => c.id === afterId);
+    if (insertIdx === -1) insertIdx = toList.cards.length;
+  }
+  
+  toList.cards.splice(insertIdx, 0, card);
+  
+  saveToLocalStorage();
+  scheduleSync();
+  render();
+}
+
+function getDragAfterElement(container, y) {
+  const cards = [...container.querySelectorAll('.card:not(.dragging)')];
+  return cards.reduce((closest, card) => {
+    const box = card.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
+    if (offset < 0 && offset > closest.offset) {
+      return { offset, element: card };
+    }
+    return closest;
+  }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+// ── Modal ──
+function openModal(listId, cardId) {
+  const list = boardState.lists.find(l => l.id === listId);
+  const card = list?.cards.find(c => c.id === cardId);
+  if (!card) return;
+  editingCardId = cardId;
+  
+  const existing = document.getElementById('cardModal');
+  if (existing) existing.remove();
+  
+  const labels = [
+    { color: '#61bd4f', text: 'green' },
+    { color: '#f2d600', text: 'yellow' },
+    { color: '#ff9f1a', text: 'orange' },
+    { color: '#eb5a46', text: 'red' },
+    { color: '#c377e0', text: 'purple' },
+    { color: '#0079bf', text: 'blue' },
+    { color: '#00c2e0', text: 'sky' },
+    { color: '#51e898', text: 'lime' },
+    { color: '#ff78cb', text: 'pink' },
+    { color: '#344563', text: 'black' }
+  ];
+  
+  const modal = document.createElement('div');
+  modal.id = 'cardModal';
+  modal.className = 'modal-backdrop';
+  modal.innerHTML = `
+    <div class="modal">
+      <div class="modal-header">
+        <span style="font-size:24px;">📋</span>
+        <input class="modal-title-input" value="${escHtml(card.title)}" id="modalTitle" spellcheck="false">
+        <button class="modal-close" id="modalClose">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-main">
+          <div class="modal-section">
+            <h4>Description</h4>
+            <textarea id="modalDesc" placeholder="Add a more detailed description...">${escHtml(card.description || '')}</textarea>
+          </div>
+          <div class="modal-section">
+            <h4>Comments</h4>
+            <div id="modalComments">
+              ${(card.comments || []).map(c => `<div class="comment-item">${escHtml(c.text)}</div>`).join('')}
+            </div>
+            <div class="comment-input-wrap">
+              <textarea id="commentInput" placeholder="Write a comment..." rows="2"></textarea>
+              <button class="btn-primary" id="addCommentBtn" style="align-self:flex-end;">Save</button>
+            </div>
+          </div>
+          <div class="modal-section">
+            <h4>Checklist</h4>
+            <div id="modalChecklist">
+              ${(card.checklist || []).map((item, i) => `
+                <div class="checklist-item">
+                  <input type="checkbox" ${item.done ? 'checked' : ''} data-cl-idx="${i}">
+                  <span class="${item.done ? 'completed' : ''}">${escHtml(item.text)}</span>
+                </div>
+              `).join('')}
+            </div>
+            <button class="add-checklist-item" id="addChecklistItemBtn">+ Add an item</button>
+            <div class="hidden" id="checklistAddWrap" style="margin-top:8px;">
+              <div class="comment-input-wrap">
+                <textarea id="checklistInput" placeholder="Add checklist item..." rows="1"></textarea>
+                <button class="btn-primary" id="saveChecklistBtn" style="align-self:flex-end;">Add</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-sidebar">
+          <div class="modal-section">
+            <h4>Labels</h4>
+            ${labels.map(l => `
+              <div class="label-row">
+                <div class="label-swatch ${(card.labels || []).some(cl => cl.color === l.color) ? 'selected' : ''}" 
+                     style="background:${l.color}" data-label-color="${l.color}" title="${l.text}">
+                  ${(card.labels || []).some(cl => cl.color === l.color) ? '✓' : ''}
+                </div>
+              </div>
+            `).join('')}
+            <input class="label-text-input hidden" id="labelTextInput" placeholder="Label text (optional)" style="margin-top:8px;">
+          </div>
+        </div>
+      </div>
     </div>
-    
-    <div class="list">
-      <h3>Done</h3>
-      <div class="card">Set up database schema</div>
-      <div>Add another card...</div>
-    </div>
-  </div>
+  `;
+  
+  document.body.appendChild(modal);
+  
+  // Close handlers
+  modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  document.addEventListener('keydown', function escHandler(e) {
+    if (e.key === 'Escape') { closeModal(); document.removeEventListener('keydown', escHandler); }
+  });
+  
+  // Title change
+  document.getElementById('modalTitle').addEventListener('change', function() {
+    const val = this.value.trim();
+    if (!val) { this.value = card.title; return; }
+    card.title = val;
+    saveToLocalStorage(); scheduleSync(); render();
+  });
+  
+  // Description change
+  document.getElementById('modalDesc').addEventListener('change', function() {
+    card.description = this.value;
+    saveToLocalStorage(); scheduleSync();
+  });
+  
+  // Labels
+  modal.querySelectorAll('.label-swatch').forEach(swatch => {
+    swatch.addEventListener('click', function() {
+      const color = this.dataset.labelColor;
+      const existing = card.labels.findIndex(l => l.color === color);
+      if (existing !== -1) {
+        card.labels.splice(existing, 1);
+        this.classList.remove('selected');
+        this.textContent = '';
+      } else {
+        const textInput = document.getElementById('labelTextInput');
+        textInput.classList.remove('hidden');
+        textInput.value = labels.find(l => l.color === color).text;
+        textInput.focus();
+        textInput.dataset.pendingColor = color;
+      }
+    });
+  });
+  
+  document.getElementById('labelTextInput').addEventListener('change', function() {
+    const color = this.dataset.pendingColor;
+    const text = this.value.trim() || labels.find(l => l.color === color).text;
+    card.labels.push({ color, text });
+    this.classList.add('hidden');
+    this.dataset.pendingColor = '';
+    this.value = '';
+    saveToLocalStorage(); scheduleSync(); render();
+    // Reopen modal to refresh
+    openModal(listId, cardId);
+  });
+  
+  // Comments
+  document.getElementById('addCommentBtn').addEventListener('click', function() {
+    const input = document.getElementById('commentInput');
+    const text = input.value.trim();
+    if (!text) return;
+    if (!card.comments) card.comments = [];
+    card.comments.push({ text });
+    input.value = '';
+    saveToLocalStorage(); scheduleSync(); render();
+    openModal(listId, cardId);
+  });
+  
+  // Checklist
+  modal.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', function() {
+      const idx = parseInt(this.dataset.clIdx);
+      if (card.checklist && card.checklist[idx]) {
+        card.checklist[idx].done = this.checked;
+        const span = this.nextElementSibling;
+        if (span) { span.classList.toggle('completed', this.checked); }
+        saveToLocalStorage(); scheduleSync(); render();
+      }
+    });
+  });
+  
+  document.getElementById('addChecklistItemBtn').addEventListener('click', function() {
+    document.getElementById('checklistAddWrap').classList.remove('hidden');
+    document.getElementById('checklistInput').focus();
+  });
+  
+  document.getElementById('saveChecklistBtn').addEventListener('click', function() {
+    const input = document.getElementById('checklistInput');
+    const text = input.value.trim();
+    if (!text) return;
+    if (!card.checklist) card.checklist = [];
+    card.checklist.push({ text, done: false });
+    input.value = '';
+    document.getElementById('checklistAddWrap').classList.add('hidden');
+    saveToLocalStorage(); scheduleSync(); render();
+    openModal(listId, cardId);
+  });
+}
+
+function closeModal() {
+  const modal = document.getElementById('cardModal');
+  if (modal) { modal.remove(); render(); }
+  editingCardId = null;
+}
+
+// ── Search ──
+document.getElementById('searchInput').addEventListener('input', function() {
+  const query = this.value.toLowerCase().trim();
+  document.querySelectorAll('.card').forEach(card => {
+    const title = card.querySelector('.card-title');
+    if (!title) return;
+    if (!query || title.textContent.toLowerCase().includes(query)) {
+      card.style.display = '';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+});
+
+// ── Init ──
+if (!loadFromLocalStorage()) {
+  saveToLocalStorage();
+}
+render();
+scheduleSync();
+</script>
 </body>
 </html>
